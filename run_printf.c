@@ -1,5 +1,4 @@
 #include "main.h"
-#include "_printf.c"
 
 int run_printf(const char *format, va_list args, buffer_t *output);
 
