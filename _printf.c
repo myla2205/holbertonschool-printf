@@ -74,6 +74,7 @@ int _printf(const char *format, ...)
 {
 	buffer_t *output;
 	va_list args;
+	int ret;
 
 	if (format == NULL)
 		return (-1);
@@ -83,6 +84,8 @@ int _printf(const char *format, ...)
 
 	va_start(args, format);
 
-	return (0);
+	ret = run_printf(format,args, output);
+
+	return (ret);
 
 }
