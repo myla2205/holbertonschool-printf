@@ -1,4 +1,5 @@
 #include "main.h"
+#include "_printf.c"
 
 int run_printf(const char *format, va_list args, buffer_t *output);
 
@@ -46,5 +47,7 @@ int run_printf(const char *format, va_list args, buffer_t *output)
 		ret += _memcpy(output, (format + i), 1);
 		i += (len != 0) ? 1 : 0;
 	}
+	cleanuo(args, output);
 	return (ret);
+
 }
