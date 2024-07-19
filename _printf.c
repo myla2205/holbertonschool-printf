@@ -1,84 +1,90 @@
 #include "main.h"
 
-unsigned int print_width(buffer_t *output, unsigned int printed,
-		unsigned char flags, int wid);
-unsigned int print_string_width(buffer_t *output,
-		unsigned char flags, int wid, int prec, int size);
-unsigned int print_neg_width(buffer_t *output, unsigned int printed,
-		unsigned char flags, int wid);
+void cleanup(va_list args, buffer_t *output);
+int run_printf(const char *format, va_list args, buffer_t *output);
+int _printf(const char *format, ...);
 
 /**
- * print_width - Stores leading spaces to a buffer for a width modifier.
- * @output: A buffer_t struct containing a character array.
- * @printed: The current number of characters already printed to output
- *           for a given number specifier.
- * @flags: Flag modifiers.
- * @wid: A width modifier.
- *
- * Return: The number of bytes stored to the buffer.
+ * cleanup - Peforms cleanup operations for _printf.
+ * @args: A va_list of arguments provided to _printf.
+ * @output: A buffer_t struct.
  */
-unsigned int print_width(buffer_t *output, unsigned int printed,
-		unsigned char flags, int wid)
+void cleanup(va_list args, buffer_t *output)
 {
-	unsigned int ret = 0;
-	char width = ' ';
+	va_end(args);
+	write(1, output->start, output->len);
+	free_buffer(output);
+}
 
-	if (NEG_FLAG == 0)
+/**
+ * run_printf - Reads through the format string for _printf.
+ * @format: Character string to print - may contain directives.
+ * @output: A buffer_t struct containing a buffer.
+ * @args: A va_list of arguments.
+ *
+ * Return: The number of characters stored to output.
+ */
+int run_printf(const char *format, va_list args, buffer_t *output)
+{
+	int i, wid, prec, ret = 0;
+	char tmp;
+	unsigned char flags, len;
+	unsigned int (*f)(va_list, buffer_t *,
+			unsigned char, int, int, unsigned char);
+
+	for (i = 0; *(format + i); i++)
 	{
-		for (wid -= printed; wid > 0;)
-			ret += _memcpy(output, &width, 1);
-	}
+		len = 0;
+		if (*(format + i) == '%')
+		{
+			tmp = 0;
+			flags = handle_flags(format + i + 1, &tmp);
+			wid = handle_width(args, format + i + tmp + 1, &tmp);
+			prec = handle_precision(args, format + i + tmp + 1,
+					&tmp);
+			len = handle_length(format + i + tmp + 1, &tmp);
 
+			f = handle_specifiers(format + i + tmp + 1);
+			if (f != NULL)
+			{
+				i += tmp + 1;
+				ret += f(args, output, flags, wid, prec, len);
+				continue;
+			}
+			else if (*(format + i + tmp + 1) == '\0')
+			{
+				ret = -1;
+				break;
+			}
+		}
+		ret += _memcpy(output, (format + i), 1);
+		i += (len != 0) ? 1 : 0;
+	}
+	cleanup(args, output);
 	return (ret);
 }
 
 /**
- * print_string_width - Stores leading spaces to a buffer for a width modifier.
- * @output: A buffer_t struct containing a character array.
- * @flags: Flag modifiers.
- * @wid: A width modifier.
- * @prec: A precision modifier.
- * @size: The size of the string.
+ * _printf - Outputs a formatted string.
+ * @format: Character string to print - may contain directives.
  *
- * Return: The number of bytes stored to the buffer.
+ * Return: The number of characters printed.
  */
-unsigned int print_string_width(buffer_t *output,
-		unsigned char flags, int wid, int prec, int size)
+int _printf(const char *format, ...)
 {
-	unsigned int ret = 0;
-	char width = ' ';
+	buffer_t *output;
+	va_list args;
+	int ret;
 
-	if (NEG_FLAG == 0)
-	{
-		wid -= (prec == -1) ? size : prec;
-		for (; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+	if (format == NULL)
+		return (-1);
+	output = init_buffer();
+	if (output == NULL)
+		return (-1);
 
-	return (ret);
-}
+	va_start(args, format);
 
-/**
- * print_neg_width - Stores trailing spaces to a buffer for a '-' flag.
- * @output: A buffer_t struct containing a character array.
- * @printed: The current number of bytes already stored to output
- *           for a given specifier.
- * @flags: Flag modifiers.
- * @wid: A width modifier.
- *
- * Return: The number of bytes stored to the buffer.
- */
-unsigned int print_neg_width(buffer_t *output, unsigned int printed,
-		unsigned char flags, int wid)
-{
-	unsigned int ret = 0;
-	char width = ' ';
-
-	if (NEG_FLAG == 1)
-	{
-		for (wid -= printed; wid > 0; wid--)
-			ret += _memcpy(output, &width, 1);
-	}
+	ret = run_printf(format, args, output);
 
 	return (ret);
 }
