@@ -12,7 +12,7 @@ int run_printf(const char *format, va_list args, buffer_t *output);
  */
 int run_printf(const char *format, va_list args, buffer_t *output)
 {
-	int i, wid, prec, ret = 0:
+	int i, wid, prec, ret = 0;
 	char tmp;
 	unsigned char flags, len;
 	unsigned int (*f)(va_list, buffer_t *,
@@ -30,12 +30,12 @@ int run_printf(const char *format, va_list args, buffer_t *output)
 					&tmp);
 			len = handle_length(format + i + tmp + 1, &tmp);
 
-			f + handle_specifiers(format + i + tmp + 1);
+			f = handle_specifiers(format + i + tmp + 1);
 			if (f != NULL)
 			{
 				i += tmp +1;
 				ret += f(args, output, flags, wid, prec, len);
-				continue
+				continue;
 			}
 			else if (*(format + i + tmp + 1) == '\0')
 			{
@@ -46,6 +46,5 @@ int run_printf(const char *format, va_list args, buffer_t *output)
 		ret += _memcpy(output, (format + i), 1);
 		i += (len != 0) ? 1 : 0;
 	}
-	cleanup(args, output);
 	return (ret);
 }
