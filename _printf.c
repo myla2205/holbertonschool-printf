@@ -12,7 +12,6 @@ int _printf(const char *format, ...)
 {
 	buffer_t *output;
 	va_list args;
-	int ret;
 
 	if (format == NULL)
 		return (-1);
@@ -22,7 +21,6 @@ int _printf(const char *format, ...)
 
 	va_start(args, format);
 
-	ret = run_printf(format, args, output);
+	return (0);
 
-	return (ret);
 }
