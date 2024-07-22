@@ -36,8 +36,19 @@ DESCRIPTION
 
        printf_reverse() prints a string in reverse order.
 
+EXAMPLE
+%c - prints character.
+%s - prints string.
+%% - prints percentage symbol.
+%d - prints decimal.
+%i - prints integer number.
+
 RETURN VALUE
        _printf() returns the number of characters printed.
 
 SEE ALSO
        printf(3), va_start(3), va_arg(3), va_end(3)
+
+AUTHOR
+RENÉ ALSINA
+KAMYL JIMÉNEZ
